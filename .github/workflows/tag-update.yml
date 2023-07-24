@@ -1,0 +1,27 @@
+name: Update Docker image tag for DEV
+
+on:
+  repository_dispatch:
+    types: [ update-dags-repo ]
+
+jobs:
+  update_dags-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          repository: junghanKang/cd-test-repo-2
+          ref: ${{ github.event.client_payload.branch }}
+
+      - name: Update .env file
+        run: |
+          sed -i "s/IMAGE_TAG=.*/IMAGE_TAG=${{ github.event.client_payload.tag }}/g" .env
+
+      - name: Commit and push DAG changes
+        run: |
+          git config --global user.email "junghan.john.kang@gmail.com"
+          git config --global user.name "John"
+          git commit -am "Update gtaas-processing docker image tag"
+          git push
